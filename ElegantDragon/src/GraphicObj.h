@@ -1,0 +1,176 @@
+#pragma once
+#include <iostream>
+#include <vector>
+#include <string>
+#include <list>
+
+#include "graphic_api_interface/IndexBuffer.h"
+#include "graphic_api_interface/VertexBuffer.h"
+#include "graphic_api_interface/VertexArray.h"
+#include "graphic_api_interface/Shader.h"
+#include "graphic_api_interface/Textures.h"
+#include "graphic_api_interface/Renderer.h"
+#include "MathDrgn.h"
+
+/*
+* Base class for graphical objects. 
+* Gurenteed to have a VB, IB, VAO, and Shader defined
+* May include CPU accessable VB and IB if defined 
+* If so, it may be used to manipulate buffers on the cpu side
+* 
+* Pointers to each item are included for ease of access
+*/
+
+//implement something for bounds detection later?
+//struct GraphicBound
+//{
+//    bool highbound = false; //lowbound = false highbound = true
+//
+//    GraphicObj* pGO;
+//};
+
+class GraphicObj
+{
+public: //Switch to protected later
+    unsigned int DDBIdx = 0; //location of this object in the database. Have 0 be invalid later (the no texture texture)
+
+    std::string name = "uninitialized";
+    unsigned short layer = 0; //0x4000 layers per graphical region (world, screen etc...)
+    unsigned int vertexCount = 0; //may or maynot be used depending on the obj.
+    std::vector<std::pair<unsigned char, std::list<GraphicObj*>::iterator>> renderBlockIters;
+    MathMatRMaj<float> ModelMat;
+
+    int cpuVBLoc = -1;//set -1 if unset
+    std::vector<float>* pcpuVB = nullptr;
+    unsigned int VBLoc = 0;
+    VertexBuffer* pVB = nullptr;
+
+    int cpuIBLoc = -1;//set -1 if unset
+    std::vector<unsigned int>* pcpuIB = nullptr;
+    unsigned int IBLoc = 0;
+    IndexBuffer* pIB = nullptr;
+
+    //maybe add layout?
+    unsigned int VAOLoc = 0;
+    VertexArray* pVAO = nullptr;
+
+    unsigned int SPLoc = 0;
+    Shader* pSP = nullptr;
+
+    unsigned int TXLoc = 0;
+    Texture* pTX = nullptr;
+
+    /// <summary>
+    /// Empty initialization
+    /// </summary>
+    GraphicObj(){
+        //create a macro for handling warnings later
+        PROJ_WARNING("Empty GraphicObj created (ignore if at start)");
+    };
+
+    /// <summary>
+    /// Name only initialization
+    /// </summary>
+    /// <param name="nameIn">Sets the name of this graphic object</param>
+    GraphicObj(
+        const std::string& nameIn
+    ) :
+        ModelMat(4, 4, 1)
+    {
+        name = nameIn;
+    };
+
+    /// <summary>
+    /// Copy and append to GObjs list
+    /// </summary>
+    /// <param name="GOIn">Input GO</param>
+    /// <param name="GObjs">List to appended</param>
+    GraphicObj(
+        const GraphicObj& GOIn, 
+        std::vector<GraphicObj*>& GObjs
+    ) : GraphicObj(GOIn) {
+        GObjs.push_back(this);
+    }
+
+    /// <summary>
+    /// Standard initialization
+    /// </summary>
+    /// <param name="GObjs">The main vector of graphic object that will be appended to</param>
+    /// <param name="nameIn">Sets the name of this graphic object</param>
+    GraphicObj(
+        std::vector<GraphicObj*>& GObjs,
+        const std::string& nameIn
+    ) : 
+        ModelMat(4, 4, 1)
+    {
+        name = nameIn;
+        GObjs.push_back(this);
+    };
+
+    //Old way of initializing
+    GraphicObj(
+        std::vector<GraphicObj*>& GObjs,
+        const unsigned int& VBLocIn, 
+        const unsigned int& IBLocIn, 
+        const unsigned int& VAOLocIn, 
+        const unsigned int& ShProgLocIn,
+        const std::string& nameIn
+    );
+
+    //For "loose" GO's (GO's that aren't defined in the DB) 
+    //All of them will have DDB of 0 but will have a address that doesn't match
+    GraphicObj(
+        const unsigned int& VBLocIn,
+        const unsigned int& IBLocIn,
+        const unsigned int& VAOLocIn,
+        const unsigned int& ShProgLocIn,
+        const std::string& nameIn
+    );
+    /*GraphicObj(const GraphicObj& srcGO) {
+
+    }*/
+
+private:
+    GraphicObj(
+        const unsigned int& DDBIdxIn,
+        const unsigned int& VBLocIn, 
+        const unsigned int& IBLocIn, 
+        const unsigned int& VAOLocIn, 
+        const unsigned int& ShProgLocIn, 
+        const std::string& nameIn
+    );
+    //Add proper way of changing attributes later then set these things to private
+
+public:
+    inline void setVertexCount(const unsigned int& vertexCountIn) { vertexCount = vertexCountIn; };
+    //Set Location to 0 if if does not refer to the DB verter indices
+    void setCpuVB(const unsigned int& cpuVBLocIn, std::vector<float>& cpuVB);
+    void setCpuIB(const unsigned int& cpuIBLocIn, std::vector<unsigned int>& cpuIB);
+
+    void setCpuVB(std::vector<std::vector<float>>& cpuVBsIn);
+    void setCpuIB(std::vector<std::vector<unsigned int>>& cpuIBsIn);
+
+    void setCpuVB(std::vector<std::vector<float>>& cpuVBsIn, const unsigned int indexIn);
+    void setCpuIB(std::vector<std::vector<unsigned int>>& cpuIBsIn, const unsigned int indexIn);
+
+
+    //Set Location to 0 if it does not refer to the DB vector indices
+    void setVB(const unsigned int& VBLocIn, VertexBuffer* pVBIn);
+    void setIB(const unsigned int& IBLocIn, IndexBuffer* pIBIn);
+    void setVAO(const unsigned int& VAOLocIn, VertexArray* pVAOIn);
+    void setSP(const unsigned int& SPLocIn, Shader* pSPIn);
+
+    //Auto Sets to the FINAL ITEM in the Vector
+    void setVB(const std::vector<VertexBuffer*>& VBsIn);
+    void setIB(const std::vector<IndexBuffer*>& IBsIn);
+    void setVAO(const std::vector<VertexArray*>& VAOsIn);
+    void setSP(const std::vector<Shader*>& SPsIn);
+
+    //Auto Sets the component givent the Vector and location in that vector;
+    void setVB(const std::vector<VertexBuffer*>& VBsIn, const unsigned int indexIn);
+    void setIB(const std::vector<IndexBuffer*>& IBsIn, const unsigned int indexIn);
+    void setVAO(const std::vector<VertexArray*>& VAOsIn, const unsigned int indexIn);
+    void setSP(const std::vector<Shader*>& SPsIn, const unsigned int indexIn);
+
+    virtual void draw(const Renderer& Rend) const { Rend.draw(*(pVAO), *(pIB), *(pSP)); };
+};

@@ -1,0 +1,3 @@
+//Version defines (filled by cmake)
+#define DRAGON_VERSION_MAJOR @ElegantDragon_VERSION_MAJOR@
+#define DRAGON_VERSION_MINOR @ElegantDragon_VERSION_MAJOR@
