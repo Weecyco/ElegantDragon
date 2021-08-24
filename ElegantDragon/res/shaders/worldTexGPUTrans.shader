@@ -1,0 +1,42 @@
+#tag Vertex
+#version 330 core
+
+layout(location = 0) in vec4 position;// we're using vec 4 bc gl_position needs to be a vec and we need to convert it later if we do vec 2. (doesn't matter if we have vecc 4)
+layout(location = 1) in vec2 texCoord;
+
+out vec2 v_texCoord; //v is for varying (things that you pass from shader to shader that varies based on Vertex locations)
+
+uniform vec2 u_objLocation; //corrects for object location
+uniform vec2 u_camLocation; //corrects for camera location
+uniform float u_camScale;
+uniform vec2 u_screenScale; //corrects for the screen width by zooming out on certain axises
+
+void main()
+{
+    //x=(camLoc[0] + src[drawIdx]) * camScaling * xScale
+    //y=(camLoc[1] + src[drawIdx + 1]) * camScaling * yScale;
+
+    //add rotartion & obj size adjustment before this
+
+    //camera and spatial adjustments
+    gl_Position = vec4((u_objLocation[0] - u_camLocation[0] + position[0]) * u_camScale * u_screenScale[0], (u_objLocation[1] - u_camLocation[1] + position[1]) * u_camScale * u_screenScale[1], 0.0, 1.0);
+    v_texCoord = texCoord;
+};
+
+#tag Fragment
+#version 330 core
+
+in vec2 v_texCoord;
+layout(location = 0) out vec4 color; //outputs color data to location 0
+
+//uniform vec4 u_Color; //uniforms are usually labelled "u_<name>"
+uniform sampler2D u_Texture;
+//the texture slot what is the sampler2D type?
+//sampler literally just means the index of the slot (image texture unit) in this case
+
+void main()
+{
+    //returns colour for texture slot 0 and coordinates texCoords
+    vec4 texColor = texture(u_Texture, v_texCoord); // for testing: vec4(v_texCoord[0], v_texCoord[1], 0.0, 1.0);
+    color = texColor;
+};

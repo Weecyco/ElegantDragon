@@ -1,0 +1,12 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\depend",
+    "\\src",
+    "\\vendor",
+    "\\vendor\\imgui",
+    "\\vendor\\stb_image"
+  ],
+  "SelectedNode": "\\vendor\\imgui\\main.cpp",
+  "PreviewInSolutionExplorer": false
+}
