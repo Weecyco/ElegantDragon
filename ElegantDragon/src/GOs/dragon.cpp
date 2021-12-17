@@ -39,7 +39,7 @@ Drgn::Drgn(DragonDB& DrgnDB, unsigned int lenIn, const DrgnType typeIn) :
     {
     case DrgnType::SolidCpuRend:
         name = "Solid_Cpu_Turn_Dragon";
-        DrgnDB.VBs.push_back(new VertexBuffer(defaultGO.pcpuVB->data(), defaultGO.pcpuVB->size() * sizeof(float)));
+        DrgnDB.VBs.push_back(new VertexBuffer(defaultGO.getpcpuVB()->data(), defaultGO.getpcpuVB()->size() * sizeof(float)));
         DrgnDB.VAOs.push_back(new VertexArray());
         
         //set layouts
@@ -49,95 +49,6 @@ Drgn::Drgn(DragonDB& DrgnDB, unsigned int lenIn, const DrgnType typeIn) :
         DrgnDB.SPs.back()->bind();
         DrgnDB.SPs.back()->setUniform4f("u_Color", 1, 1, 1, 1); //just as default
         break;
-    case DrgnType::SolidShaderTransform:
-        name = "Solid_ShaderTransform_Dragon";
-        //generates the full list of vert and idx buffers based on the len and the predefined values in the cpuVB & cpuIB
-        //IMPORTANT cpu VB and IB MUST be already set to what you want at this point
-        drgnVert = generateDragonVert(len);
-        drgnIdx = generateDragonIdx(len); //set to 0 if moving the generation to be built into length resizer
-
-        DrgnDB.VBs.push_back(new VertexBuffer(drgnVert, len * defaultGO.pcpuVB->size() * sizeof(float)));
-        DrgnDB.VAOs.push_back(new VertexArray());
-
-        DrgnDB.IBs.push_back(new IndexBuffer(drgnIdx, len * defaultGO.pcpuIB->size(), GL_DYNAMIC_DRAW)); //loads new IB to the Data base
-        setIB(DrgnDB.IBs); // assigns the new IB to this object
-
-        //set layouts
-        Layout.push<float>(2);
-
-        DrgnDB.SPs.push_back(new Shader("res/shaders/worldSolGPUTrans.shader"));
-        DrgnDB.SPs.back()->bind();
-        DrgnDB.SPs.back()->setUniform2f("u_camLocation", DrgnDB.camLoc[0], DrgnDB.camLoc[1]);
-        DrgnDB.SPs.back()->setUniform1f("u_camScale", DrgnDB.camScaling);
-        DrgnDB.SPs.back()->setUniform2f("u_screenScale", DrgnDB.xScale, DrgnDB.yScale);
-        DrgnDB.SPs.back()->setUniform4f("u_Color", 1, 1, 1, 1); //just as default
-
-        break;
-    case DrgnType::Style0ShaderTransform:
-    {
-        name = "Style0_ShaderTransform_Dragon";
-        /*DrgnDB.cpuVBs.push_back(std::vector<float>{
-                1.0 / 3.0,                          0.0      ,                      0.0,                                    0.0,
-                1.0 / 3.0,                          1.0 / 3.0,                      0.0,                                    0.5,
-                2.0 / 3.0,                          2.0 / 3.0,                      0.5,                                    1,
-                1.0,                                2.0 / 3.0,                      1,                                      1,
-                1.0,                                1.0 / 3.0,                      1,                                      0.5,
-                1.0 - INNER_VERTEX_DISTANCE_THIRD,  1.0 / 3.0,                      1 - (INNER_VERTEX_DISTANCE_THIRD*3/2),  0.5,
-                2.0 / 3.0,                          INNER_VERTEX_DISTANCE_THIRD,    0.5,                                    INNER_VERTEX_DISTANCE_THIRD * 3 / 2,
-                2.0 / 3.0,                          0.0,                            0.5,                                    0.0
-        });
-        setCpuVB(DrgnDB.cpuVBs);*/
-        float textureMap[] = {
-                0.0,                                    0.0,
-                0.0,                                    0.5,
-                0.5,                                    1,
-                1,                                      1,
-                1,                                      0.5,
-                1 - (INNER_VERTEX_DISTANCE_THIRD * 3 / 2),  0.5,
-                0.5,                                    INNER_VERTEX_DISTANCE_THIRD * 3 / 2,
-                0.5,                                    0.0
-        };
-
-        drgnVert = generateDragonVert(len);
-        drgnVert = appendTextureMap(drgnVert, textureMap, len);
-        /*std::cout << "\n\npost function" << drgnVert << "\n";
-        for (int i = 0; i < 100; i++)
-        {
-            std::cout << drgnVert[i] << " ";
-        }*/
-
-        drgnIdx = generateDragonIdx(len); //set to 0 if moving the generation to be built into length resizer
-
-        std::cout << "VB total size: " << len * vertexCount * 4 << std::endl;
-        /*std::cout << "\n\n";
-        for (int i = 0; i < 100; i++)
-        {
-            std::cout << drgnVert[i] << " ";
-        }
-        std::cout << "\n\n";
-        for (int i = 0; i < 100; i++)
-        {
-            std::cout << drgnIdx[i] << " ";
-        }
-        std::cout << "\n\n";*/
-        DrgnDB.VBs.push_back(new VertexBuffer(drgnVert, len * vertexCount * 4 * sizeof(float)));
-        DrgnDB.VAOs.push_back(new VertexArray());
-
-        DrgnDB.IBs.push_back(new IndexBuffer(drgnIdx, len * defaultGO.pcpuIB->size(), GL_DYNAMIC_DRAW)); //loads new IB to the Data base
-        setIB(DrgnDB.IBs); // assigns the new IB to this object
-
-        //set layouts
-        Layout.push<float>(2); //location 0
-        Layout.push<float>(2); //location 1
-
-        DrgnDB.SPs.push_back(new Shader("res/shaders/worldTexGPUTrans.shader"));
-        DrgnDB.SPs.back()->bind();
-        DrgnDB.SPs.back()->setUniform2f("u_camLocation", DrgnDB.camLoc[0], DrgnDB.camLoc[1]); //hard code location offest for now
-        DrgnDB.SPs.back()->setUniform1f("u_camScale", DrgnDB.camScaling);
-        DrgnDB.SPs.back()->setUniform2f("u_screenScale", DrgnDB.xScale, DrgnDB.yScale);
-        DrgnDB.SPs.back()->setUniform1i("u_Texture", 0);//hard code to 0 temporarily
-    }
-        break;
     case DrgnType::SolidMVP:
         name = "Solid_MVP_Dragon";
         //generates the full list of vert and idx buffers based on the len and the predefined values in the cpuVB & cpuIB
@@ -145,10 +56,10 @@ Drgn::Drgn(DragonDB& DrgnDB, unsigned int lenIn, const DrgnType typeIn) :
         drgnVert = generateDragonVert(len);
         drgnIdx = generateDragonIdx(len); //set to 0 if moving the generation to be built into length resizer
 
-        DrgnDB.VBs.push_back(new VertexBuffer(drgnVert, len * defaultGO.pcpuVB->size() * sizeof(float)));
+        DrgnDB.VBs.push_back(new VertexBuffer(drgnVert, len * defaultGO.getpcpuVB()->size() * sizeof(float)));
         DrgnDB.VAOs.push_back(new VertexArray());
 
-        DrgnDB.IBs.push_back(new IndexBuffer(drgnIdx, len * defaultGO.pcpuIB->size(), GL_DYNAMIC_DRAW)); //loads new IB to the Data base
+        DrgnDB.IBs.push_back(new IndexBuffer(drgnIdx, len * defaultGO.getpcpuIB()->size(), GL_DYNAMIC_DRAW)); //loads new IB to the Data base
         setIB(DrgnDB.IBs); // assigns the new IB to this object
 
         //set layouts
@@ -182,7 +93,7 @@ Drgn::Drgn(DragonDB& DrgnDB, unsigned int lenIn, const DrgnType typeIn) :
         DrgnDB.VBs.push_back(new VertexBuffer(drgnVert, len * vertexCount * 4 * sizeof(float)));
         DrgnDB.VAOs.push_back(new VertexArray());
 
-        DrgnDB.IBs.push_back(new IndexBuffer(drgnIdx, len * defaultGO.pcpuIB->size(), GL_DYNAMIC_DRAW)); //loads new IB to the Data base
+        DrgnDB.IBs.push_back(new IndexBuffer(drgnIdx, len * defaultGO.getpcpuIB()->size(), GL_DYNAMIC_DRAW)); //loads new IB to the Data base
         setIB(DrgnDB.IBs); // assigns the new IB to this object
 
         //set layouts
@@ -390,16 +301,6 @@ unsigned int* Drgn::generateDragonIdx(const unsigned int& lenIn)
             indexBuffMapFull[turnIdx * pcpuIB->size() + elemIdx] = (*pcpuIB)[elemIdx] + (vertexCount * turnIdx);
         }
     }
-    /*std::cout << "[IB VALUES LIST]" << std::endl;
-    for (unsigned int turnIdx = 0; turnIdx < lenIn; ++turnIdx)
-    {
-        std::cout << "Turn " << turnIdx << ": ";
-        for (unsigned int elemIdx = 0; elemIdx < pcpuIB->size(); ++elemIdx)
-        {
-            std::cout << "#" << elemIdx << "=" << indexBuffMapFull[turnIdx * pcpuIB->size() + elemIdx] << " ";
-        }
-        std::cout << std::endl;
-    }*/
     return indexBuffMapFull;
 }
 
@@ -422,90 +323,6 @@ void Drgn::printTurns()
     }
 }
 
-int Drgn::drawDragon(DragonDB& DrgnDB)
-{
-    MathVec<float> Dir(2);
-    Dir[1] = 1;
-    MathVec<float> Loc(2);
-    Loc[0] = location[0];//initialize base location to the desired location
-    Loc[1] = location[1];
-    
-    bool lastTurn = 0; //let 0=right 1=left (initialize to default image mapping)
-    //quite inefficient to recalculate the vertices when there are only 4 possibilities (or 8 if not dependent on direction)
-    //but who cases lol. well it is more efficent on memory at least err by a bit
-
-    // initialize vertex locations to the desired
-    float* vertexBuffMap = new float[pcpuVB->size()];
-    for (unsigned int i = 0; i < pcpuVB->size(); ++i)
-    {
-        vertexBuffMap[i] = (*pcpuVB)[i] + (i % 2 ? location[1] : location[0]);
-    }
-
-    for (unsigned int drgnIdx = 0; drgnIdx < curLen; ++drgnIdx)
-    {
-        //only check turn. it is prerotated and transposed
-        if ((*this)[drgnIdx] != lastTurn)
-        {
-            //use generalized mirror off the direction Dir once available
-            for (unsigned int i = 0; i < pcpuVB->size(); i += 2)
-            {
-                if (std::abs(Dir[0]) < 0.5)
-                    vertexBuffMap[i] = (vertexBuffMap[i] - (Loc[0] + 0.5)) * -1 + (Loc[0] + 0.5);
-                else if (std::abs(Dir[1]) < 0.5)
-                    vertexBuffMap[i + 1] = (vertexBuffMap[i + 1] - (Loc[1] + 0.5)) * -1 + (Loc[1] + 0.5);
-            }
-        }
-
-        //update locations and draw
-        float* bufferData = DrgnDB.worldToScreen(vertexBuffMap, pcpuVB->size());
-        pVB->setDataB(bufferData, sizeof(float) * pcpuVB->size());
-        DrgnDB.rend.draw(*pVAO, *pIB, *pSP);
-        delete[] bufferData;
-
-        //rotate since we're now facing a different direction
-        float rotation = 0;
-        /*if ((*this)[drgnIdx] == 0)
-        {
-            rotation = -PI / 2;
-        }
-        else
-        {
-            rotation = PI / 2;
-        }*/
-        switch ((*this)[drgnIdx])
-        {
-        case 0:
-            rotation = -PI / 2;
-            break;
-        case 1:
-            rotation = PI / 2;
-            break;
-        default:
-            PROJ_ASSERT_W_MSG(0, "Invalid rotation value return");
-        }
-        for (unsigned int i = 0; i + 1 < pcpuVB->size(); i += 2)
-        {
-            MathVec<float>::rotate2(rotation, vertexBuffMap[i], vertexBuffMap[i + 1], Loc[0] + 0.5, Loc[1] + 0.5);
-        }
-        //adjust pretence vectors to prepare for next one
-        Dir.rotate(rotation);
-
-        //have vertexBuffMap reference Loc later it will make it cleaner. 
-        //probably have a special function to generate the final locations with one transpose too
-        for (unsigned int i = 0; i < pcpuVB->size(); ++i)
-        {
-            vertexBuffMap[i] += Dir[i % 2];
-        }
-        Loc[0] = Loc[0] + Dir[0];
-        Loc[1] = Loc[1] + Dir[1];
-        
-
-        lastTurn = (*this)[drgnIdx];
-    }
-
-    delete[] vertexBuffMap;
-    return 0;
-}
 
 void Drgn::setCurLen(const unsigned int curLenIn) {
     PROJ_ASSERT(curLenIn <= len)
@@ -516,8 +333,6 @@ void Drgn::setCurLen(const unsigned int curLenIn) {
 
     switch (drgnType)
     {
-    case DrgnType::SolidShaderTransform:
-    case DrgnType::Style0ShaderTransform: //update if necessary for Style 0
     case DrgnType::SolidMVP:
     case DrgnType::Style0MVP:
     {

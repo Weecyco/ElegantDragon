@@ -1,61 +1,5 @@
 #include "MVPRenderBlock.h"
 
-void quickOrderRenderBlock::drawAll(const Renderer& Rend) const
-{
-    for (auto iter = RendObjsList.begin(); iter != RendObjsList.end(); ++iter)
-    {
-        (*iter)->draw(Rend);
-    }
-}
-
-std::list<GraphicObj*>::iterator quickOrderRenderBlock::insert(GraphicObj* GOIn)
-{
-    //declare and set default return iterator
-    std::list<GraphicObj*>::iterator returnIter = RendObjsList.end();
-
-    //find location to insert with map, insert to list, insert to map
-    auto posIter = RendObjsMap.upper_bound(GOIn->layer);
-    if (posIter == RendObjsMap.end())
-    {
-        RendObjsList.push_back(GOIn);
-        returnIter = RendObjsList.end()--;
-    }
-    else
-    {
-        returnIter = RendObjsList.insert((*posIter).second, GOIn);
-    }
-    RendObjsMap.insert({ GOIn->layer, returnIter });
-    return returnIter;
-}
-
-bool quickOrderRenderBlock::del(GraphicObj* GOIn)
-{
-    auto range = RendObjsMap.equal_range(GOIn->layer);
-    for (auto i = range.first; i != range.second; ++i)
-    {
-        if (*(i->second) == GOIn)
-        {
-            RendObjsList.erase(i->second);
-            RendObjsMap.erase(i);
-            return 0;
-        }
-    }
-    return 1;
-}
-
-std::list<GraphicObj*>::iterator quickOrderRenderBlock::find(GraphicObj* GOIn)
-{
-    auto range = RendObjsMap.equal_range(GOIn->layer);
-    for (auto i = range.first; i != range.second; ++i)
-    {
-        if (*(i->second) == GOIn)
-        {
-            return i->second;
-        }
-    }
-    return RendObjsList.end();
-}
-
 quickAccessRenderBlock::quickAccessRenderBlock(std::vector<quickAccessRenderBlock*>& renderBlockListIn) : 
     cameraRot(1, 3),
     cameraLoc(1, 3)
@@ -73,21 +17,21 @@ quickAccessRenderBlock::quickAccessRenderBlock(std::vector<quickAccessRenderBloc
     renderBlockListIn.push_back(this);
 }
 
-quickAccessRenderBlock::quickAccessRenderBlock(std::vector<quickAccessRenderBlock*>& renderBlockListIn, const std::list<GraphicObj*>& RendObjsListIn) : 
-    quickAccessRenderBlock(renderBlockListIn)
-{
-    for (auto iter = RendObjsListIn.begin(); iter != RendObjsListIn.end(); ++iter)
-    {
-        RendObjsList.push_back(*iter);
-    }
-}
+//quickAccessRenderBlock::quickAccessRenderBlock(std::vector<quickAccessRenderBlock*>& renderBlockListIn, const std::list<GraphicObj*>& RendObjsListIn) : 
+//    quickAccessRenderBlock(renderBlockListIn)
+//{
+//    for (auto iter = RendObjsListIn.begin(); iter != RendObjsListIn.end(); ++iter)
+//    {
+//        RendObjsList.push_back(*iter);
+//    }
+//}
 
 quickAccessRenderBlock::quickAccessRenderBlock(std::vector<quickAccessRenderBlock*>& renderBlockListIn, const quickAccessRenderBlock& src) :
     quickAccessRenderBlock(renderBlockListIn)
 {
     for (auto iter = src.RendObjsList.begin(); iter != src.RendObjsList.end(); ++iter)
     {
-        RendObjsList.push_back(*iter);
+        RendObjsList.insert(*iter);
     }
 }
 
@@ -123,12 +67,14 @@ void quickAccessRenderBlock::drawAll(const Renderer& Rend)
         }
     }
 
-    //render object
+    //render objects
     for (auto iter = RendObjsList.begin(); iter != RendObjsList.end(); ++iter)
     {
-        (*iter)->pSP->bind();
-        (*iter)->pSP->setUniformMatrix4f("MVP", (RM[0] * (*iter)->ModelMat).getContent(), GL_TRUE);
-        (*iter)->draw(Rend);
+        //if()//TODO: check for model dirty bit & postDirtyBit to see if MVP needs to be regenerated
+        iter->second.multDirect(RM[0], iter->first->viewModelMat());
+        iter->first->getpSP()->bind();
+        iter->first->getpSP()->setUniformMatrix4f("MVP", iter->second.getContent(), GL_TRUE);
+        iter->first->draw(Rend);
     }
 }
 

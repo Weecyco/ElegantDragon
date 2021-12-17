@@ -173,3 +173,44 @@ void GraphicObj::setSP(const std::vector<Shader*>& SPsIn, const unsigned int ind
     SPLoc = indexIn;
     pSP = SPsIn[indexIn];
 }
+
+VertexBuffer* GraphicObj::getpVB()
+{
+    // TODO: insert return statement here
+    return pVB;
+}
+
+IndexBuffer* GraphicObj::getpIB()
+{
+    // TODO: insert return statement here
+    return pIB;
+}
+
+VertexArray* GraphicObj::getpVAO()
+{
+    // TODO: insert return statement here
+    return pVAO;
+}
+
+Shader* GraphicObj::getpSP()
+{
+    // TODO: insert return statement here
+    return pSP;
+}
+
+Texture* GraphicObj::getpTX()
+{
+    // TODO: insert return statement here
+    return pTX;
+}
+
+const MathMatRMaj<float>& GraphicObj::viewModelMat() const
+{
+    return ModelMat;
+}
+
+MathMatRMaj<float>& GraphicObj::editModelMat()
+{
+    modelMatDirtyBit = true;
+    return ModelMat;
+}

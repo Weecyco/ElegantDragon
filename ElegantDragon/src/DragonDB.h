@@ -56,13 +56,6 @@ public:
     //all graphical objects will reference these graphic elements to let themselves be drawn.
     std::vector<GraphicObj*> GObjs; //holds an array of graphic Obj which will hold the vertex, index buffers, and textures 
 
-    
-    quickOrderRenderBlock worldRendObjs; //holds a linked list of GO's in the world space. (Also acts as the layer list if used for rendering)
-                               //map for O(log(n)) insertion / deletion
-
-    quickOrderRenderBlock screenRendObjs; //holds a linked list of GO's in the screen space. (Also acts as the layer list if used for rendering)
-                                //map for O(log(n)) insertion / deletion
-
     //std::multimap<float, > implement something for accelerating bounds detection later
 
     /*
@@ -74,6 +67,7 @@ public:
     std::vector<std::vector<unsigned int>> cpuIBs;
     std::vector<std::vector<float>> cpuVBs;
 
+    //might be better to use a linked list depending on the use case ie. if we constantly need to load in or remove things
     std::vector<IndexBuffer*> IBs;
     std::vector<VertexBuffer*> VBs;
     std::vector<VertexArray*> VAOs;//the vao should reference the VB and layout
@@ -86,22 +80,5 @@ public:
 
     DragonDB(const unsigned int DDBIdx, const float homeScaling, const std::pair<unsigned int, unsigned int> &resolutionIn);
     ~DragonDB();
-
-    double getCurrentScaling();
-    float* worldToScreen(const float* src, unsigned int size, unsigned int entrySize = 2);
-
-    //put this stuff into its own structure later
-    float camScaling;
-    MathVec<float> camLoc; //in world units
-    float xScale;//switch to vec later
-    float yScale;
-
-    void transCam(CameraTranType, std::chrono::milliseconds duration, MathVec<float> location);
-    void cameraHandle(); //performs cameras stuff once per frame based on the given actions during that frame and decides how to handle it
-private:
-    bool frameCamDone = false; //set to avoid multiple transitions at once
-    std::chrono::milliseconds transCamSetDuration = std::chrono::milliseconds(0);
-    CameraTranType transitionType = CameraTranType::Jump;
-    MathVec<float> location = MathVec<float>(2);
 };
 

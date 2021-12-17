@@ -31,14 +31,14 @@
 
 class GraphicObj
 {
-public: //Switch to protected later
+protected: //Switch to protected later
     unsigned int DDBIdx = 0; //location of this object in the database. Have 0 be invalid later (the no texture texture)
 
     std::string name = "uninitialized";
-    unsigned short layer = 0; //0x4000 layers per graphical region (world, screen etc...)
     unsigned int vertexCount = 0; //may or maynot be used depending on the obj.
     std::vector<std::pair<unsigned char, std::list<GraphicObj*>::iterator>> renderBlockIters;
     MathMatRMaj<float> ModelMat;
+    bool modelMatDirtyBit = 0;
 
     int cpuVBLoc = -1;//set -1 if unset
     std::vector<float>* pcpuVB = nullptr;
@@ -60,10 +60,11 @@ public: //Switch to protected later
     unsigned int TXLoc = 0;
     Texture* pTX = nullptr;
 
+public:
     /// <summary>
     /// Empty initialization
     /// </summary>
-    GraphicObj(){
+    GraphicObj() {
         //create a macro for handling warnings later
         PROJ_WARNING("Empty GraphicObj created (ignore if at start)");
     };
@@ -86,7 +87,7 @@ public: //Switch to protected later
     /// <param name="GOIn">Input GO</param>
     /// <param name="GObjs">List to appended</param>
     GraphicObj(
-        const GraphicObj& GOIn, 
+        const GraphicObj& GOIn,
         std::vector<GraphicObj*>& GObjs
     ) : GraphicObj(GOIn) {
         GObjs.push_back(this);
@@ -100,7 +101,7 @@ public: //Switch to protected later
     GraphicObj(
         std::vector<GraphicObj*>& GObjs,
         const std::string& nameIn
-    ) : 
+    ) :
         ModelMat(4, 4, 1)
     {
         name = nameIn;
@@ -110,9 +111,9 @@ public: //Switch to protected later
     //Old way of initializing
     GraphicObj(
         std::vector<GraphicObj*>& GObjs,
-        const unsigned int& VBLocIn, 
-        const unsigned int& IBLocIn, 
-        const unsigned int& VAOLocIn, 
+        const unsigned int& VBLocIn,
+        const unsigned int& IBLocIn,
+        const unsigned int& VAOLocIn,
         const unsigned int& ShProgLocIn,
         const std::string& nameIn
     );
@@ -133,10 +134,10 @@ public: //Switch to protected later
 private:
     GraphicObj(
         const unsigned int& DDBIdxIn,
-        const unsigned int& VBLocIn, 
-        const unsigned int& IBLocIn, 
-        const unsigned int& VAOLocIn, 
-        const unsigned int& ShProgLocIn, 
+        const unsigned int& VBLocIn,
+        const unsigned int& IBLocIn,
+        const unsigned int& VAOLocIn,
+        const unsigned int& ShProgLocIn,
         const std::string& nameIn
     );
     //Add proper way of changing attributes later then set these things to private
@@ -159,18 +160,34 @@ public:
     void setIB(const unsigned int& IBLocIn, IndexBuffer* pIBIn);
     void setVAO(const unsigned int& VAOLocIn, VertexArray* pVAOIn);
     void setSP(const unsigned int& SPLocIn, Shader* pSPIn);
+    //void setTX(const unsigned int& TXLocIn, Texture* pTXIn);
 
     //Auto Sets to the FINAL ITEM in the Vector
     void setVB(const std::vector<VertexBuffer*>& VBsIn);
     void setIB(const std::vector<IndexBuffer*>& IBsIn);
     void setVAO(const std::vector<VertexArray*>& VAOsIn);
     void setSP(const std::vector<Shader*>& SPsIn);
+    //void setTX(const std::vector<Texture*>& TXsIn);
 
     //Auto Sets the component givent the Vector and location in that vector;
     void setVB(const std::vector<VertexBuffer*>& VBsIn, const unsigned int indexIn);
     void setIB(const std::vector<IndexBuffer*>& IBsIn, const unsigned int indexIn);
     void setVAO(const std::vector<VertexArray*>& VAOsIn, const unsigned int indexIn);
     void setSP(const std::vector<Shader*>& SPsIn, const unsigned int indexIn);
+    //void setTX(const std::vector<Texture*>& TXsIn, const unsigned int indexIn);
+
+    //returns pointer to Buffers
+    inline std::vector<float>* getpcpuVB() { return pcpuVB; };
+    inline std::vector<unsigned int>* getpcpuIB() { return pcpuIB; };
+    VertexBuffer* getpVB(); //maybe change these to inline and define here if i don't need anything too complecated
+    IndexBuffer* getpIB();
+    VertexArray* getpVAO();
+    Shader* getpSP();
+    Texture* getpTX();
+
+    const MathMatRMaj<float>& viewModelMat() const;
+    MathMatRMaj<float>& editModelMat();
+
 
     virtual void draw(const Renderer& Rend) const { Rend.draw(*(pVAO), *(pIB), *(pSP)); };
 };

@@ -8,10 +8,8 @@
 
 enum class DrgnType {
     SolidCpuRend = 0,
-    SolidShaderTransform = 1,
-    Style0ShaderTransform = 2,
-    SolidMVP = 3,
-    Style0MVP = 4
+    SolidMVP = 1,
+    Style0MVP = 2
 };
 
 class Drgn : public GraphicObj
@@ -26,7 +24,7 @@ private:
     MathVec<float> location;
 
 public:
-    Drgn(DragonDB& DrgnDB, unsigned int lenIn, const DrgnType shaderType = DrgnType::SolidShaderTransform);
+    Drgn(DragonDB& DrgnDB, unsigned int lenIn, const DrgnType shaderType = DrgnType::SolidCpuRend);
     Drgn(const Drgn& src);
     ~Drgn();
 
@@ -36,7 +34,6 @@ public:
 
     int setLocation(float x, float y);
     int setLocation(MathVec<float> src);
-    int drawDragon(DragonDB& DrgnDB);
 
     bool operator[](const unsigned int) const;
 

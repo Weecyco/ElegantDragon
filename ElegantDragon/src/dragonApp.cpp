@@ -112,37 +112,13 @@ static int dragonLoop(GLFWwindow* window, DragonDB& DrgnDB)
 
     //Object setup
     unsigned len = 4096;
-    //Drgn testDragon0(DrgnDB, len, DrgnType::SolidCpuRend);
-    ////testDragon0.printTurns();
-    ////sets colour
-    //testDragon0.pSP->setUniform4f("u_Color", 0.992, 0.60, 0.30, 1);
-
-    //Drgn testDragon1(DrgnDB, len, DrgnType::SolidCpuRend);
-    ////actually the same shader lol that's why we need to set it every single frame...
-    ////which do you value more gpu memory to hold an extra shader or cpu time for swapping colours?
-    ////these trade offs are annoying...
-    ////LOLOL nevermind... shaders are applied per frame swap it seems... can't do cpu option
-    //testDragon1.pSP->setUniform4f("u_Color", 0.1, 0.1, 0.1, 0.5);
-
-    Drgn testDragon2(DrgnDB, len, DrgnType::SolidShaderTransform);
-    testDragon2.pSP->bind();
-    testDragon2.pSP->setUniform4f("u_Color", 0.1, 0.1, 0.1, 0.5);
-    DrgnDB.worldRendObjs.insert(&testDragon2);
-
-    Drgn stealsDragon2(testDragon2);
-
-
-    Drgn testDragon3(DrgnDB, len, DrgnType::Style0ShaderTransform);
-    testDragon3.pSP->setUniform2f("u_objLocation", 0, 0);
-    testDragon3.layer = 1; //replace with proper layer adjustment function later set it as a private too
-    DrgnDB.worldRendObjs.insert(&testDragon3);
 
     Drgn testDragon4(DrgnDB, len, DrgnType::SolidMVP);
-    DrgnDB.RenderBlocks[1]->push_back(&testDragon4);
+    DrgnDB.RenderBlocks[1]->insert(&testDragon4);
     Drgn testDragon5(DrgnDB, len, DrgnType::Style0MVP);
-    DrgnDB.RenderBlocks[1]->push_back(&testDragon5);
-    testDragon5.ModelMat[0][3] = 0;
-    testDragon4.ModelMat[2][3] = -5;
+    DrgnDB.RenderBlocks[1]->insert(&testDragon5);
+    testDragon5.editModelMat()[0][3] = 0;
+    testDragon4.editModelMat()[2][3] = -5;
 
 
     //Renderer setup
@@ -159,18 +135,6 @@ static int dragonLoop(GLFWwindow* window, DragonDB& DrgnDB)
     for (unsigned int i = 0; i < PERF_COUNT_BUFFER_SIZE; ++i)
         lastFrameTimes[i] = std::chrono::microseconds(0);
 
-    /*for (auto iter0 = DragDB.cpuVBs.begin(); iter0 != DragDB.cpuVBs.end(); iter0++) {
-        for (auto iter1 = iter0->begin(); iter1 != iter0->end(); iter1++)
-        {
-            std::cout << *iter1 << std::endl;
-        }
-    }
-    for (auto iter0 = DragDB.cpuIBs.begin(); iter0 != DragDB.cpuIBs.end(); iter0++) {
-        for (auto iter1 = iter0->begin(); iter1 != iter0->end(); iter1++)
-        {
-            std::cout << *iter1 << std::endl;
-        }
-    }*/
     unsigned long frameNum = 0;
     //testDragon2.setCurLen(3067);
     while (!glfwWindowShouldClose(window))
@@ -198,10 +162,10 @@ static int dragonLoop(GLFWwindow* window, DragonDB& DrgnDB)
             //ImGui::Checkbox("Another Window", &show_another_window);
 
             //edits x, y, z values for the camera transform (negative of camera location aka. world's offset)
-            //applies -10.0f to 40.0f offset to original value
-            ImGui::SliderFloat("x", &(DrgnDB.RenderBlocks[1]->editMat(0)[0][3]), -30.0f, 30.0f);
-            ImGui::SliderFloat("y", &(DrgnDB.RenderBlocks[1]->editMat(0)[1][3]), -30.0f, 30.0f);
-            ImGui::SliderFloat("z", &(DrgnDB.RenderBlocks[1]->editMat(0)[2][3]), -10.0f, 40.0f);
+            //applies -30.0f to 30.0f offset to original value
+            ImGui::SliderFloat("x", &(DrgnDB.RenderBlocks[1]->editMat(0)[0][3]), -100.0f, 100.0f);
+            ImGui::SliderFloat("y", &(DrgnDB.RenderBlocks[1]->editMat(0)[1][3]), -100.0f, 100.0f);
+            ImGui::SliderFloat("z", &(DrgnDB.RenderBlocks[1]->editMat(0)[2][3]), -100.0f, 100.0f);
 
             //edits x, y, z values for the camera transform (negative of camera location aka. world's offset)
             //applies -10.0f to 40.0f offset to original value
@@ -214,6 +178,7 @@ static int dragonLoop(GLFWwindow* window, DragonDB& DrgnDB)
             DrgnDB.RenderBlocks[1]->applyRotCard(1, 0, rotZ);
 
             ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
+            pRend->setBackground(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
 
             if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
                 counter++;
@@ -233,7 +198,7 @@ static int dragonLoop(GLFWwindow* window, DragonDB& DrgnDB)
             ImGui::Text("World Point");
             ImGui::SliderFloat("x", &(InputPoint[0][0]), -30.0f, 30.0f);
             ImGui::SliderFloat("y", &(InputPoint[1][0]), -30.0f, 30.0f);
-            ImGui::SliderFloat("z", &(InputPoint[2][0]), -10.0f, 40.0f);
+            ImGui::SliderFloat("z", &(InputPoint[2][0]), -30.0f, 30.0f);
             ZeroMap = DrgnDB.RenderBlocks[1]->viewRes(0) * InputPoint;
             ImGui::Text("Mapping <%.2f, %.2f, %.2f>WS to <%.2f, %.2f, %.2f>SS", 
                 InputPoint[0][0], InputPoint[1][0], InputPoint[2][0],
@@ -246,11 +211,11 @@ static int dragonLoop(GLFWwindow* window, DragonDB& DrgnDB)
                 DrgnDB.RenderBlocks[1]->viewRes(0, 2, 0), DrgnDB.RenderBlocks[1]->viewRes(0, 2, 1), DrgnDB.RenderBlocks[1]->viewRes(0, 2, 2), DrgnDB.RenderBlocks[1]->viewRes(0, 2, 3),
                 DrgnDB.RenderBlocks[1]->viewRes(0, 3, 0), DrgnDB.RenderBlocks[1]->viewRes(0, 3, 1), DrgnDB.RenderBlocks[1]->viewRes(0, 3, 2), DrgnDB.RenderBlocks[1]->viewRes(0, 3, 3));
             
-            /*ImGui::Text("P Matrix (hardcoded to Component #3):\n <%5.2f, %5.2f, %5.2f, %5.2f>,\n <%5.2f, %5.2f, %5.2f, %5.2f>,\n <%5.2f, %5.2f, %5.2f, %5.2f>,\n <%5.2f, %5.2f, %5.2f, %5.2f>",
-                DrgnDB.RenderBlocks[1]->viewMat(3, 0, 0), DrgnDB.RenderBlocks[1]->viewMat(3, 0, 1), DrgnDB.RenderBlocks[1]->viewMat(3, 0, 2), DrgnDB.RenderBlocks[1]->viewMat(3, 0, 3),
-                DrgnDB.RenderBlocks[1]->viewMat(3, 1, 0), DrgnDB.RenderBlocks[1]->viewMat(3, 1, 1), DrgnDB.RenderBlocks[1]->viewMat(3, 1, 2), DrgnDB.RenderBlocks[1]->viewMat(3, 1, 3),
-                DrgnDB.RenderBlocks[1]->viewMat(3, 2, 0), DrgnDB.RenderBlocks[1]->viewMat(3, 2, 1), DrgnDB.RenderBlocks[1]->viewMat(3, 2, 2), DrgnDB.RenderBlocks[1]->viewMat(3, 2, 3),
-                DrgnDB.RenderBlocks[1]->viewMat(3, 3, 0), DrgnDB.RenderBlocks[1]->viewMat(3, 3, 1), DrgnDB.RenderBlocks[1]->viewMat(3, 3, 2), DrgnDB.RenderBlocks[1]->viewMat(3, 3, 3));*/
+            //ImGui::Text("P Matrix (hardcoded to Component #3):\n <%5.2f, %5.2f, %5.2f, %5.2f>,\n <%5.2f, %5.2f, %5.2f, %5.2f>,\n <%5.2f, %5.2f, %5.2f, %5.2f>,\n <%5.2f, %5.2f, %5.2f, %5.2f>",
+            //    DrgnDB.RenderBlocks[1]->viewMat(3, 0, 0), DrgnDB.RenderBlocks[1]->viewMat(3, 0, 1), DrgnDB.RenderBlocks[1]->viewMat(3, 0, 2), DrgnDB.RenderBlocks[1]->viewMat(3, 0, 3),
+            //    DrgnDB.RenderBlocks[1]->viewMat(3, 1, 0), DrgnDB.RenderBlocks[1]->viewMat(3, 1, 1), DrgnDB.RenderBlocks[1]->viewMat(3, 1, 2), DrgnDB.RenderBlocks[1]->viewMat(3, 1, 3),
+            //    DrgnDB.RenderBlocks[1]->viewMat(3, 2, 0), DrgnDB.RenderBlocks[1]->viewMat(3, 2, 1), DrgnDB.RenderBlocks[1]->viewMat(3, 2, 2), DrgnDB.RenderBlocks[1]->viewMat(3, 2, 3),
+            //    DrgnDB.RenderBlocks[1]->viewMat(3, 3, 0), DrgnDB.RenderBlocks[1]->viewMat(3, 3, 1), DrgnDB.RenderBlocks[1]->viewMat(3, 3, 2), DrgnDB.RenderBlocks[1]->viewMat(3, 3, 3));
 
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
             ImGui::End();
@@ -259,42 +224,13 @@ static int dragonLoop(GLFWwindow* window, DragonDB& DrgnDB)
         //a temporary terrible implementation
         unsigned int time = (std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - generalTimerInit)).count();
 
-        /* add stuff here */
-        //Rend.draw(testDragIB.getCount());
-
-        //Rend.draw(*(DragDB.VAOs[1]), *(DragDB.IBs[1]), *(DragDB.ShProgs[1]));
-        //pRend->draw(*DrgnDB.VAOs[0], *DrgnDB.IBs[0], *DrgnDB.SPs[0]);
-
         unsigned int turnLen = time / 20000 % len;
-        /*testDragon1.setCurLen(turnLen - (turnLen > 7 ? 7 : turnLen));
-        testDragon1.setLocation(0.7 + 3*std::sin(time / 400000.0), 1.4 + std::cos(time / 400000.0));
-        testDragon1.drawDragon(DrgnDB);
-
-        testDragon0.setCurLen(turnLen);
-        testDragon0.drawDragon(DrgnDB);*/
-
-        //stealsDragon2.pSP->bind();
-        //stealsDragon2.pSP->setUniform2f("u_objLocation", -1.3 + 3 * std::sin(time / 400000.0), -0.4 + std::cos(time / 400000.0));
-        //stealsDragon2.pSP->setUniform4f("u_Color", 0.1f, 0.3f, 0.2f, 0.7f);
-        //stealsDragon2.draw(*pRend);
-
-        //testDragon2.setCurLen(turnLen);
-        //testDragon2.pSP->bind();
-        //testDragon2.pSP->setUniform2f("u_objLocation", 0.7 + 3 * std::sin(time / 400000.0), 1.4 + std::cos(time / 400000.0));
-        //testDragon2.pSP->setUniform4f("u_Color", 0.1f, 0.1f, 0.1f, 0.5f);
-        ////pRend->draw(*(testDragon2.pVAO), *(testDragon2.pIB), *(testDragon2.pSP));
-
-        //
-        //testDragon3.setCurLen(turnLen);
-        ////pRend->draw(*(testDragon3.pVAO), *(testDragon3.pIB), *(testDragon3.pSP));
         
         testDragon4.setCurLen(turnLen);
         testDragon5.setCurLen(turnLen);
         
         //draws everything onto the screen
         DrgnDB.RenderBlocks[1]->drawAll(*pRend);
-        //DrgnDB.worldRendObjs.drawAll(*pRend);
-        //DrgnDB.screenRendObjs.drawAll(*pRend);
 
         //Render ImGui
         ImGui::Render();

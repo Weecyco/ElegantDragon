@@ -1,37 +1,18 @@
 #pragma once
 #include <forward_list>
 #include <map>
+#include <utility>
+#include <unordered_map>
 
 #include "graphicObj.h"
 #include "MathDrgn.h"
 
-//May soon be deprecated (not enough reason to hard wire an ordered data structure if the gpu handles it)
-//may be useful for mouse selection, but not for rendering
-//Handles the layering for a render space
-//provides O(n) all item traversal
-//provides O(log(n)) complexity insert, deletion, and search when no duplicate layer numbers O(n) when all layer numbers are equal
-class quickOrderRenderBlock
-{
-private:
-    std::list<GraphicObj*> RendObjsList;
-    std::multimap<unsigned int, std::list<GraphicObj*>::iterator> RendObjsMap;
-public:
-    void drawAll(const Renderer& Rend) const;
-
-    inline std::list<GraphicObj*>::iterator begin() { return RendObjsList.begin(); };
-    inline std::list<GraphicObj*>::iterator end() { return RendObjsList.end(); };
-
-    //Add a O(1) version that for push back / front later that gives the O(log(n)) part to a separate thread
-    std::list<GraphicObj*>::iterator insert(GraphicObj* GOIn);
-    bool del(GraphicObj* GOIn);
-    std::list<GraphicObj*>::iterator find(GraphicObj* GOIn);
-};
-
 
 //faster at push back / front and lower overall overhead (when object ordering is not needed)
+//TODO MAKE FASTER WITH UNORDERED MAP (hash table) OF THE RENDER OBJS LIST
 class quickAccessRenderBlock {
 protected:
-    std::list<GraphicObj*> RendObjsList; //list of objects in this render space (must have MVP uniform) TODO: make into a pair<>
+    std::unordered_map<GraphicObj*, MathMatRMaj<float>> RendObjsList; //list of objects in this render space (must have MVP uniform) TODO: make into a pair<>
     unsigned char renderBlockID = 0;
 
     //TODO: option to switch to using a tree pattern if we want log(n) for all singular edits but nlog(n) space complexity instead of n
@@ -57,7 +38,7 @@ protected:
 
 public:
     quickAccessRenderBlock(std::vector<quickAccessRenderBlock*>& renderBlockListIn);
-    quickAccessRenderBlock(std::vector<quickAccessRenderBlock*>& renderBlockListIn, const std::list<GraphicObj*>& RendObjsListIn);
+    //quickAccessRenderBlock(std::vector<quickAccessRenderBlock*>& renderBlockListIn, const std::list<GraphicObj*>& RendObjsListIn);
     quickAccessRenderBlock(std::vector<quickAccessRenderBlock*>& renderBlockListIn, const quickAccessRenderBlock& src);
     quickAccessRenderBlock(const quickAccessRenderBlock& src) {PROJ_ASSERT_W_MSG(0, "Copy constructor is not enabled for quickAccessRenderBlock. Please use 'quickAccessRenderBlock(std::vector<quickAccessRenderBlock>& renderBlockListIn, const quickAccessRenderBlock& src)'"); };\
                                                                //temporarily disable copy con. maybe implement later but we have the renderBlockList dependent one
@@ -67,14 +48,15 @@ public:
     void drawAll(const Renderer& Rend);
 
     //Object list control
-    inline std::list<GraphicObj*>::iterator begin() { return RendObjsList.begin(); };
-    inline std::list<GraphicObj*>::iterator end() { return RendObjsList.end(); };
+    inline std::unordered_map<GraphicObj*, MathMatRMaj<float>>::iterator begin() { return RendObjsList.begin(); };
+    inline std::unordered_map<GraphicObj*, MathMatRMaj<float>>::iterator end() { return RendObjsList.end(); };
 
-    inline void push_back(GraphicObj* pGOIn) { RendObjsList.push_back(pGOIn); };
-    inline void push_front(GraphicObj* pGOIn) { RendObjsList.push_front(pGOIn); };
-    inline void remove(GraphicObj* GOIn) { RendObjsList.remove(GOIn); };
-    inline void erase(std::list<GraphicObj*>::iterator iter) { RendObjsList.erase(iter); };
-    inline std::list<GraphicObj*>::iterator find(GraphicObj* pGOIn) {};
+    inline void insert(GraphicObj* pGOIn) { RendObjsList.insert({ pGOIn, MathMatRMaj<float>(4, 4, true)}); };
+    //inline void remove(GraphicObj* GOIn) { RendObjsList.remove(GOIn); };
+
+    //perform find() then erase() for if you only have GO
+    inline void erase(std::unordered_map<GraphicObj*, MathMatRMaj<float>>::iterator iter) { RendObjsList.erase(iter); };
+    inline std::unordered_map<GraphicObj*, MathMatRMaj<float>>::iterator find(GraphicObj* pGOIn) { return RendObjsList.find(pGOIn); };
 
     //Matrix vector control
     void addMatrix(MathMatRMaj<float>&& _Val);
