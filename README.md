@@ -1,5 +1,5 @@
 # ElegantDragon
-A simple graphics engine.
+A simple graphics library.
 <br>Currently developing as a personal computer graphics learning and exploration platform. 
 ### Goal: 
 To develop Elegant Dragon into a personalized a graphics library for future projects.
@@ -7,7 +7,7 @@ To develop Elegant Dragon into a personalized a graphics library for future proj
 ### To Do:
  - Change the data structure behind the matrix transformation and move frequent/low variability operations to the GPU.
  - Crop screen space depending on camera settings
- - Create proper shaders to accomany camera changes and implement various shading techniques presets ie. blin-phong
+ - Create shaders to accomany camera changes and implement various shading technique presets ie. blin-phong
  - Design the user input interface or add an existing one as part of the package
  - Change dependencies on git into submodules (if applicable)
  - Add Vulkan support
