@@ -11,6 +11,7 @@
 #include "graphic_api_interface/Textures.h"
 #include "graphic_api_interface/Renderer.h"
 #include "MathDrgn.h"
+#include "GOTypeList.h"
 
 /*
 * Base class for graphical objects. 
@@ -34,6 +35,7 @@ class GraphicObj
 protected: //Switch to protected later
     unsigned int DDBIdx = 0; //location of this object in the database. Have 0 be invalid later (the no texture texture)
 
+    GOTypeList type = GOTypeList::Unknown;
     std::string name = "uninitialized";
     unsigned int vertexCount = 0; //may or maynot be used depending on the obj.
     std::vector<std::pair<unsigned char, std::list<GraphicObj*>::iterator>> renderBlockIters;
@@ -70,15 +72,17 @@ public:
     };
 
     /// <summary>
-    /// Name only initialization
+    /// Name / type  only initialization
     /// </summary>
     /// <param name="nameIn">Sets the name of this graphic object</param>
     GraphicObj(
-        const std::string& nameIn
+        const std::string& nameIn,
+        const GOTypeList typeIn = GOTypeList::Unknown
     ) :
         ModelMat(4, 4, 1)
     {
         name = nameIn;
+        type = typeIn;
     };
 
     /// <summary>
@@ -100,11 +104,13 @@ public:
     /// <param name="nameIn">Sets the name of this graphic object</param>
     GraphicObj(
         std::vector<GraphicObj*>& GObjs,
-        const std::string& nameIn
+        const std::string& nameIn,
+        const GOTypeList typeIn = GOTypeList::Unknown
     ) :
         ModelMat(4, 4, 1)
     {
         name = nameIn;
+        type = typeIn;
         GObjs.push_back(this);
     };
 
@@ -188,6 +194,40 @@ public:
     const MathMatRMaj<float>& viewModelMat() const;
     MathMatRMaj<float>& editModelMat();
 
-
+    //Default to draw
     virtual void draw(const Renderer& Rend) const { Rend.draw(*(pVAO), *(pIB), *(pSP)); };
+
+    //Type check
+    const GOTypeList getType() const;
+
+    //Default to invisible / never intersect To be implemented per object
+    virtual bool intersectPt(const MathVec3f& point) const {return false;};
+    virtual bool intersectLine() const { return false;};
+    virtual bool intersectFace() const { return false;};
+    virtual bool intersectObj() const { return false;};
+
+    /// <summary>
+    /// Fins Min/Max point of its intersecting volume in a specific direction in world space
+    /// </summary>
+    /// <param name="dir">A Direction </param>
+    /// <returns>Min/Max point of its intersecting volume</returns>
+    virtual MathVec3f boundsRangeMin(const MathVec3f& dir) const;
+    virtual MathVec3f boundsRangeMax(const MathVec3f& dir) const;
+
+    /// <summary>
+    /// Fins Min/Max point of its intersecting volume in a specific cardinal direction in world space
+    /// </summary>
+    /// <param name="dir">A Cardinal Direction </param>
+    /// <returns>Min/Max point of its intersecting volume</returns>
+    virtual MathVec3f boundsRangeCardinalMin(EDrgn::Direction3 dir) const;
+    virtual MathVec3f boundsRangeCardinalMax(EDrgn::Direction3 dir) const;
+
+    /// <summary>
+    /// Returns Min/Max corner points of a rectangular bounding volume in world space
+    /// Should contain all intersectable points
+    /// </summary>
+    /// <returns>Vec3 representing the corners of he volume </returns>
+    virtual MathVec3f boundsRangeCardinalMin() const;
+    virtual MathVec3f boundsRangeCardinalMax() const;
+
 };

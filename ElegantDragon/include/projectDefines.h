@@ -51,3 +51,26 @@
 
 //duplicate checks but meh
 #define PROJ_ASSERT_W_MSG(x, msg) if(!(x)) {PROJ_ERROR(msg); PROJ_ASSERT(0);}; //produces an assert with a message
+#define PROJ_SOFT_ASSERT_W_MSG(x, msg) if(!(x)) {PROJ_WARNING(msg)}; // just a warning with a condition
+
+namespace EDrgn
+{
+    enum class Direction2
+    {
+        x = 0,
+        y = 1
+    };
+    enum class Direction3
+    {
+        x = 0,
+        y = 1,
+        z = 2
+    };
+    enum class Direction4
+    {
+        x = 0,
+        y = 1,
+        z = 2,
+        w = 4
+    };
+} //namespace EDrgn

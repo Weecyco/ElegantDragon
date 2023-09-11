@@ -111,7 +111,7 @@ static int dragonLoop(GLFWwindow* window, DragonDB& DrgnDB)
 
 
     //Object setup
-    unsigned len = 4096;
+    unsigned len = 4096;//10000000;
 
     Drgn testDragon4(DrgnDB, len, DrgnType::SolidMVP);
     DrgnDB.RenderBlocks[1]->insert(&testDragon4);
@@ -148,8 +148,13 @@ static int dragonLoop(GLFWwindow* window, DragonDB& DrgnDB)
         ImGui::NewFrame();
 
         {
-            static float f = 0.0f;
-            static int counter = 0;
+            static enum SceneNumber
+            {
+                SceneEmpty = 0,
+                SceneBasicDragon = 1,
+                SceneShaderTest = 2
+            };
+            static SceneNumber Scene = SceneEmpty;
 
             static float rotX = 0;
             static float rotY = 0;
@@ -180,13 +185,19 @@ static int dragonLoop(GLFWwindow* window, DragonDB& DrgnDB)
             ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
             pRend->setBackground(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
 
-            if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
-                counter++;
+            if (ImGui::Button("Empty"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
+                Scene = SceneNumber::SceneBasicDragon;
             ImGui::SameLine();
-            ImGui::Text("counter = %d", counter);
+            if (ImGui::Button("Basic Dragon"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
+                Scene = SceneNumber::SceneBasicDragon;
+            ImGui::SameLine();
+            if (ImGui::Button("Shader Test"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
+                Scene = SceneNumber::SceneShaderTest;
+            ImGui::SameLine();
+            ImGui::Text("Scene = %d", Scene);
             ImGui::End();
         }
-
+        
         {
             static float inputData[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
             static MathMatRMaj<float> InputPoint(1, 4, inputData);
@@ -260,9 +271,9 @@ static int dragonLoop(GLFWwindow* window, DragonDB& DrgnDB)
                 std::cout << lastFrameTimes[i].count() << " ";
             std::cout << std::endl;*/
         }
+        perfClock = std::chrono::high_resolution_clock::now();
         glfwSwapBuffers(window);
 
-        perfClock = std::chrono::high_resolution_clock::now();
         frameNum++;
         /* Poll for and process events */
         glfwPollEvents();

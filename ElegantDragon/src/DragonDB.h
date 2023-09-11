@@ -22,8 +22,6 @@ enum class CameraTranType
     Smoothed = 2
 };
 
-
-
 /*
 * Data base for the Dragon application. Holds various settings and components
 */

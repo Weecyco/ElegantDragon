@@ -143,7 +143,7 @@ void MathVec<T>::rotate2(const float& rad, T& x, T& y, const T& x0, const T& y0)
 template<typename T>
 class MathMatRMaj
 {
-private:
+protected:
     //maybe switch to short in the future?
     unsigned int numCol;
     unsigned int numRow;
@@ -185,6 +185,11 @@ public:
     MathMatRMaj<T>& operator=(const MathMatRMaj<T>& rhs);
     MathMatRMaj<T>& operator*=(const MathMatRMaj<T>& rhs);
     MathMatRMaj<T>& multAssignReverse(const MathMatRMaj<T>& lhs);
+
+    bool inline operator<(const MathMatRMaj<T>& rhs);
+    bool inline operator<=(const MathMatRMaj<T>& rhs);
+    bool inline operator>(const MathMatRMaj<T>& rhs);
+    bool inline operator>=(const MathMatRMaj<T>& rhs);
 
     //Helpful functions:
     void setToIdentity();
@@ -561,6 +566,66 @@ inline MathMatRMaj<T>& MathMatRMaj<T>::multAssignReverse(const MathMatRMaj<T>& l
 }
 
 template<typename T>
+bool inline MathMatRMaj<T>::operator<(const MathMatRMaj<T>& rhs)
+{
+    PROJ_ASSERT_W_MSG(size == rhs.size, "Matrix comparison size mismatch");
+    PROJ_SOFT_ASSERT_W_MSG(numCol == rhs.numCol, "Matrix comparison dimention mismatch");
+    for (unsigned int idx = 0; idx < size; ++idx)
+    {
+        if (content[idx] >= rhs.content[idx])
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+template<typename T>
+bool inline MathMatRMaj<T>::operator<=(const MathMatRMaj<T>& rhs)
+{
+    PROJ_ASSERT_W_MSG(size == rhs.size, "Matrix comparison size mismatch");
+    PROJ_SOFT_ASSERT_W_MSG(numCol == rhs.numCol, "Matrix comparison dimention mismatch");
+    for (unsigned int idx = 0; idx < size; ++idx)
+    {
+        if (content[idx] > rhs.content[idx])
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+template<typename T>
+bool inline MathMatRMaj<T>::operator>(const MathMatRMaj<T>& rhs)
+{
+    PROJ_ASSERT_W_MSG(size == rhs.size, "Matrix comparison size mismatch");
+    PROJ_SOFT_ASSERT_W_MSG(numCol == rhs.numCol, "Matrix comparison dimention mismatch");
+    for (unsigned int idx = 0; idx < size; ++idx)
+    {
+        if (content[idx] <= rhs.content[idx])
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+template<typename T>
+bool inline MathMatRMaj<T>::operator>=(const MathMatRMaj<T>& rhs)
+{
+    PROJ_ASSERT_W_MSG(size == rhs.size, "Matrix comparison size mismatch");
+    PROJ_SOFT_ASSERT_W_MSG(numCol == rhs.numCol, "Matrix comparison dimention mismatch");
+    for (unsigned int idx = 0; idx < size; ++idx)
+    {
+        if (content[idx] < rhs.content[idx])
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+template<typename T>
 inline void MathMatRMaj<T>::setToIdentity()
 {
     for (unsigned int idx = 0; idx < size; ++idx)
@@ -582,5 +647,28 @@ inline void MathMatRMaj<T>::setToZero()
     }
 }
 
+/* Derivitives for easier access */
+/* should not introdue anything new besides x, y, z access*/
+class MathVec3f : public MathMatRMaj<float>
+{
+public:
+    float& x;
+    float& y;
+    float& z;
+    MathVec3f() : MathMatRMaj<float>(1, 3), x(content[0]), y(content[1]), z(content[2]) {}
+    MathVec3f(const MathVec3f& src) : MathMatRMaj<float>(src), x(content[0]), y(content[1]), z(content[2]) {}
+    MathVec3f(float* contentIn) : MathMatRMaj<float>(1, 3, contentIn), x(content[0]), y(content[1]), z(content[2]) {}
+    MathVec3f(float xIn, float yIn, float zIn) : MathMatRMaj<float>(1, 3), x(content[0]), y(content[1]), z(content[2])
+    {
+        x = xIn;
+        y = yIn;
+        z = zIn;
+    }
+    //replace [] operator with 1D access. Non virtual as original still works
+    float& operator[](const unsigned int pos)
+    {
+        return content[pos];
+    }
 
-
+    //Should use MathMatRMaj's destructor
+};

@@ -77,7 +77,6 @@ void GraphicObj::setCpuIB(std::vector<std::vector<unsigned int>>& cpuIBsIn)
     PROJ_ASSERT_W_MSG(cpuIBsIn.size() > 0, "Attempted to set A Graphic Object's cpu's Index Buffer with an empty cpuIB vector");
     cpuIBLoc = cpuIBsIn.size() - 1;
     pcpuIB = &cpuIBsIn.back();
-    
 }
 
 void GraphicObj::setCpuVB(std::vector<std::vector<float>>& cpuVBsIn, const unsigned int indexIn)
@@ -213,4 +212,41 @@ MathMatRMaj<float>& GraphicObj::editModelMat()
 {
     modelMatDirtyBit = true;
     return ModelMat;
+}
+
+const GOTypeList GraphicObj::getType() const
+{
+    return type;
+}
+
+MathVec3f GraphicObj::boundsRangeMin(const MathVec3f& dir) const
+{
+    //Consider performing space transform to align with cardinal and then calling cardingal versions
+    return MathVec3f();
+}
+
+MathVec3f GraphicObj::boundsRangeMax(const MathVec3f& dir) const
+{
+    //Consider performing space transform to align with cardinal and then calling cardingal versions
+    return MathVec3f();
+}
+
+MathVec3f GraphicObj::boundsRangeCardinalMin(EDrgn::Direction3 dir) const
+{
+    return MathVec3f();
+}
+
+MathVec3f GraphicObj::boundsRangeCardinalMax(EDrgn::Direction3 dir) const
+{
+    return MathVec3f();
+}
+
+MathVec3f GraphicObj::boundsRangeCardinalMin() const
+{
+    return MathVec3f();
+}
+
+MathVec3f GraphicObj::boundsRangeCardinalMax() const
+{
+    return MathVec3f();
 }
