@@ -13,7 +13,7 @@
 class SceneContainer
 {
 protected:
-	RectBoundElem TreeObjects; //O(LogN) location change, O(LogN) intersection (if balanced) O(n) worst case
+	RectBoundElem* TreeObjects; //O(LogN) location change, O(LogN) intersection (if balanced) O(n) worst case
 	std::set<GraphicObj*> ListObjects; //O(1) location change, O(N) intersection
 public:
 	//future implementation if want to simplify structures

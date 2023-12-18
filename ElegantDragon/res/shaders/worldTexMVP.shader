@@ -29,5 +29,6 @@ void main()
 {
     //returns colour for texture slot 0 and coordinates texCoords
     vec4 texColor = texture(u_Texture, v_texCoord); // for testing: vec4(v_texCoord[0], v_texCoord[1], 0.0, 1.0);
+    //vec4 texColor = vec4(v_texCoord[0], v_texCoord[1], 0.0, 1.0);
     color = texColor;
 };

@@ -1,7 +1,7 @@
 #include "Textures.h"
 #include "stb_image/stb_image.h"
 
-Texture::Texture(const std::string& path/*, unsigned int slot = 0*/) :
+Texture::Texture(const std::string& path, unsigned int slotIn/* = 0 */) :
     renderID(0), filePath(path), localBuffer(nullptr), width(0), height(0), BPP(0)
 {
 
@@ -29,6 +29,9 @@ Texture::Texture(const std::string& path/*, unsigned int slot = 0*/) :
     
     if (localBuffer)
         stbi_image_free(localBuffer); //basically just free since it's dynamically alocated
+
+    slot = slotIn;
+    bind();
 }
 
 Texture::~Texture()
@@ -36,7 +39,7 @@ Texture::~Texture()
     GL_SAFE(glDeleteTextures(1, &renderID)); // deletes on GPU side
 }
 
-void Texture::bind(unsigned int slot /*= 0 just reminding that this is on the header defn. side*/) const
+void Texture::bind() const
 {
     //no check since OGL will probably catch it?
     GL_SAFE(glActiveTexture(GL_TEXTURE0 + slot)); //up to 32 but may be less depending on the system 

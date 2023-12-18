@@ -137,6 +137,8 @@ public:
 
     }*/
 
+    virtual ~GraphicObj() {};
+
 private:
     GraphicObj(
         const unsigned int& DDBIdxIn,
@@ -149,6 +151,7 @@ private:
     //Add proper way of changing attributes later then set these things to private
 
 public:
+    inline std::string getName() const { return name; };
     inline void setVertexCount(const unsigned int& vertexCountIn) { vertexCount = vertexCountIn; };
     //Set Location to 0 if if does not refer to the DB verter indices
     void setCpuVB(const unsigned int& cpuVBLocIn, std::vector<float>& cpuVB);
@@ -166,21 +169,21 @@ public:
     void setIB(const unsigned int& IBLocIn, IndexBuffer* pIBIn);
     void setVAO(const unsigned int& VAOLocIn, VertexArray* pVAOIn);
     void setSP(const unsigned int& SPLocIn, Shader* pSPIn);
-    //void setTX(const unsigned int& TXLocIn, Texture* pTXIn);
+    void setTX(const unsigned int& TXLocIn, Texture* pTXIn);
 
     //Auto Sets to the FINAL ITEM in the Vector
     void setVB(const std::vector<VertexBuffer*>& VBsIn);
     void setIB(const std::vector<IndexBuffer*>& IBsIn);
     void setVAO(const std::vector<VertexArray*>& VAOsIn);
     void setSP(const std::vector<Shader*>& SPsIn);
-    //void setTX(const std::vector<Texture*>& TXsIn);
+    void setTX(const std::vector<Texture*>& TXsIn);
 
     //Auto Sets the component givent the Vector and location in that vector;
     void setVB(const std::vector<VertexBuffer*>& VBsIn, const unsigned int indexIn);
     void setIB(const std::vector<IndexBuffer*>& IBsIn, const unsigned int indexIn);
     void setVAO(const std::vector<VertexArray*>& VAOsIn, const unsigned int indexIn);
     void setSP(const std::vector<Shader*>& SPsIn, const unsigned int indexIn);
-    //void setTX(const std::vector<Texture*>& TXsIn, const unsigned int indexIn);
+    void setTX(const std::vector<Texture*>& TXsIn, const unsigned int indexIn);
 
     //returns pointer to Buffers
     inline std::vector<float>* getpcpuVB() { return pcpuVB; };
@@ -229,5 +232,7 @@ public:
     /// <returns>Vec3 representing the corners of he volume </returns>
     virtual MathVec3f boundsRangeCardinalMin() const;
     virtual MathVec3f boundsRangeCardinalMax() const;
+
+    virtual MathVec3f getCOM() const;
 
 };

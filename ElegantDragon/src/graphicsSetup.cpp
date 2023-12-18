@@ -28,12 +28,16 @@ char DragonDB::graphicsSetup()
 
 
     //Load textures:
-    TXs.push_back(new Texture("res/textures/dragon_textures/Dragon_Corner_Texture-Small_Dark_NoBack.png"));//Qinni-Final_WIP_redo_Sketch_Colour_Unfinished.png
-    TXs.back()->bind(0);
+    //idx 0
+    TXs.push_back(new Texture("res/textures/dragon_textures/Dragon_Corner_Texture-Small_Dark_NoBack.png", 0));//Qinni-Final_WIP_redo_Sketch_Colour_Unfinished.png
+    //idx 1
+    TXs.push_back(new  Texture("res/textures/test_arena_textures/shaded_frame.png", 1));
+    //TXs.back()->bind(1);
 
     //define all GO's
     
     //manual definitions
+    //May want to add unload functionality later to save memory when unused.
 
     //TODO: re-factor this stuff into into more usable functions to reduce redundancy
     //TODO: separate manual definition from automatic ones once we (I) start implementing imports
@@ -76,6 +80,7 @@ char DragonDB::graphicsSetup()
         GObjs.back()->setIB(IBs);
         GObjs.back()->setVAO(VAOs);
         GObjs.back()->setSP(SPs);
+        GObjs.back()->setTX(TXs, 0);
 
         //old way of initializing
         /*new GraphicObj(
@@ -148,6 +153,35 @@ char DragonDB::graphicsSetup()
     Drgn::defaultGO.pIB = IBs.back();
     Drgn::defaultGO.pVAO = VAOs.back();
     Drgn::defaultGO.pSP = ShProgs.back();*/
+
+    //Simple unit box object
+    /*{
+        float VB[] = {
+            0.0f, 0.0f, 0.0f,
+            1.0f, 0.0f, 0.0f,
+            0.0f, 1.0f, 0.0f,
+            0.0f, 0.0f, 1.0f,
+            1.0f, 1.0f, 0.0f,
+            0.0f, 1.0f, 1.0f,
+            1.0f, 0.0f, 1.0f,
+            1.0f, 1.0f, 1.0f,
+        };
+        float IB[] = {
+            0, 1, 6,
+            0, 6, 3,
+            2, 0, 3,
+            2, 3, 5,
+            3, 6, 7,
+            3, 7, 5,
+            0, 2, 4,
+            0, 4, 1,
+            1, 4, 7,
+            1, 7, 6,
+            2, 5, 7,
+            2, 7, 4
+        };
+
+    }*/
 
     return 0;
 }

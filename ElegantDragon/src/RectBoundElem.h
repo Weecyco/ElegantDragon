@@ -6,13 +6,16 @@
 //ideal: Each level with 2 items (more if we expect more misses), located based on k Means algo, depths are balances
 class RectBoundElem : public GraphicObj
 {
+private:
+    static const unsigned int defaultSize = 2;
 protected:
     friend class SceneContainer;
-    GraphicObj** childObj = nullptr;
+    std::vector<GraphicObj*> childObj;
     unsigned int childCount;
 
     MathVec3f cornerPt0;
     MathVec3f cornerPt1;
+
     //for balancing purposes if there is movement (above a certatin threshold) remove and replace in closest COM. 
     //if all far, consider creating a new child 
     MathVec3f centerOfMass; 
@@ -24,6 +27,7 @@ public:
     ~RectBoundElem();
     RectBoundElem(DragonDB& DrgnDB, unsigned int sizeIn);
     void setChild(GraphicObj* ChildObjIn, unsigned int loc); //perhaps add pushback option?
+    void pushBack(GraphicObj* ChildObjIn);
     GraphicObj* getChild(unsigned int loc) const; // not considering child to be part of "itself"
     const unsigned int getChildCount() const;
 
@@ -37,4 +41,6 @@ public:
 
     virtual MathVec3f boundsRangeCardinalMin() const;
     virtual MathVec3f boundsRangeCardinalMax() const;
+
+    //virtual MathVec3f getCOM() const;
 };

@@ -19,13 +19,13 @@ VertexBuffer::~VertexBuffer()
 
 void VertexBuffer::setData(const void* data, unsigned int size, const unsigned short& drawType/* = GL_STATIC_DRAW*/)
 {
-    GL_SAFE(glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW));
+    GL_SAFE(glBufferData(GL_ARRAY_BUFFER, size, data, drawType));
 }
 
 void VertexBuffer::setDataB(const void* data, unsigned int size, const unsigned short& drawType/* = GL_STATIC_DRAW*/)
 {
     GL_SAFE(glBindBuffer(GL_ARRAY_BUFFER, renderID));
-    GL_SAFE(glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW));
+    GL_SAFE(glBufferData(GL_ARRAY_BUFFER, size, data, drawType));
 }
 
 void VertexBuffer::bind() const

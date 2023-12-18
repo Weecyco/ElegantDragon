@@ -451,10 +451,14 @@ inline MathMatRMaj<T>& MathMatRMaj<T>::multDirect(const MathMatRMaj<T>& lhs, con
     /*PROJ_ASSERT_W_MSG(&lhs != this, "The object itself may not be passed in");
     PROJ_ASSERT_W_MSG(&rhs != this, "The object itself may not be passed in");*/
     //MathMatRMaj<float> ResMat(rhs.numCol, lhs.numRow);
-    numCol = rhs.numCol;
-    numRow = lhs.numRow;
-    delete[] content;
-    content = new T[numRow * numCol];
+
+    if (numCol != rhs.numCol || numRow != lhs.numRow)
+    {
+        numCol = rhs.numCol;
+        numRow = lhs.numRow;
+        delete[] content;
+        content = new T[numRow * numCol];
+    }
 
     for (unsigned int row = 0; row < numRow; ++row)
     {
@@ -473,11 +477,14 @@ inline MathMatRMaj<T>& MathMatRMaj<T>::multDirect(const MathMatRMaj<T>& lhs, con
 template<typename T>
 inline MathMatRMaj<T>& MathMatRMaj<T>::multDirect(const float& lhs, const MathMatRMaj<T>& rhs)
 {
-    delete[] content;
-    numCol = rhs.numRow;
-    numRow = rhs.numRow;
-    size = rhs.size;
-    content = new T[numRow * numCol];
+    if (numCol != rhs.numCol || numRow != lhs.numRow)
+    {
+        delete[] content;
+        numCol = rhs.numRow;
+        numRow = rhs.numRow;
+        size = rhs.size;
+        content = new T[numRow * numCol];
+    }
     for (unsigned int contentIdx = 0; contentIdx < rhs.size; ++contentIdx)
     {
         content[contentIdx] = lhs * rhs.content[contentIdx];
@@ -488,11 +495,14 @@ inline MathMatRMaj<T>& MathMatRMaj<T>::multDirect(const float& lhs, const MathMa
 template<typename T>
 inline MathMatRMaj<T>& MathMatRMaj<T>::multDirect(const MathMatRMaj<T>& lhs, const float& rhs)
 {
-    delete[] content;
-    numCol = lhs.numRow;
-    numRow = lhs.numRow;
-    size = lhs.size;
-    content = new T[numRow * numCol];
+    if (numCol != rhs.numCol || numRow != lhs.numRow)
+    {
+        delete[] content;
+        numCol = lhs.numRow;
+        numRow = lhs.numRow;
+        size = lhs.size;
+        content = new T[numRow * numCol];
+    }
     for (unsigned int contentIdx = 0; contentIdx < lhs.size; ++contentIdx)
     {
         content[contentIdx] = rhs * lhs.content[contentIdx];
@@ -504,11 +514,14 @@ template<typename T>
 inline MathMatRMaj<T>& MathMatRMaj<T>::operator=(const MathMatRMaj<T>& rhs)
 {
     //std::cout << "ASSIGNMENT OPPERATOR" << std::endl;
-    delete[] content;
-    size = rhs.size;
-    numCol = rhs.numCol;
-    numRow = rhs.numRow;
-    content = new T[size];
+    if (numCol != rhs.numCol || numRow != rhs.numRow)
+    {
+        delete[] content;
+        size = rhs.size;
+        numCol = rhs.numCol;
+        numRow = rhs.numRow;
+        content = new T[size];
+    }
     for (unsigned int idx = 0; idx < size; ++idx)
     {
         content[idx] = rhs.content[idx];
@@ -523,9 +536,12 @@ inline MathMatRMaj<T>& MathMatRMaj<T>::operator*=(const MathMatRMaj<T>& rhs)
     PROJ_ASSERT_W_MSG(numCol == rhs.numRow, "Matrix Multiplication Column-Row mismatch. object col# must match rhs row#");
     PROJ_ASSERT_W_MSG(&rhs != this, "The object itself may not be passed in");
     MathMatRMaj<T> Orig(*this);
-    numCol = rhs.numCol;
-    delete[] content;
-    content = new T[numRow * numCol];
+    if (numCol != rhs.numCol)
+    {
+        numCol = rhs.numCol;
+        delete[] content;
+        content = new T[numRow * numCol];
+    }
 
     for (unsigned int row = 0; row < numRow; ++row)
     {
@@ -547,9 +563,12 @@ inline MathMatRMaj<T>& MathMatRMaj<T>::multAssignReverse(const MathMatRMaj<T>& l
     PROJ_ASSERT_W_MSG(lhs.numCol == numRow, "Matrix Multiplication Column-Row mismatch. object col# must match rhs row#");
     PROJ_ASSERT_W_MSG(&lhs != this, "The object itself may not be passed in");
     MathMatRMaj<T> Orig(*this);
-    numRow = lhs.numRow;
-    delete[] content;
-    content = new T[numRow * numCol];
+    if (numRow != lhs.numRow)
+    {
+        numRow = lhs.numRow;
+        delete[] content;
+        content = new T[numRow * numCol];
+    }
 
     for (unsigned int row = 0; row < numRow; ++row)
     {
@@ -655,6 +674,7 @@ public:
     float& x;
     float& y;
     float& z;
+    //TODO: write base class wise copy contructor (condition that size is 1,3)
     MathVec3f() : MathMatRMaj<float>(1, 3), x(content[0]), y(content[1]), z(content[2]) {}
     MathVec3f(const MathVec3f& src) : MathMatRMaj<float>(src), x(content[0]), y(content[1]), z(content[2]) {}
     MathVec3f(float* contentIn) : MathMatRMaj<float>(1, 3, contentIn), x(content[0]), y(content[1]), z(content[2]) {}
@@ -668,6 +688,16 @@ public:
     float& operator[](const unsigned int pos)
     {
         return content[pos];
+    }
+    //replace implicitly defined operators with base class operators
+    MathVec3f& operator=(const MathVec3f& lhs)
+    {
+        //x = lhs.x;
+        //y = lhs.y;
+        //z = lhs.z;
+
+        MathMatRMaj<float>::operator*=(lhs);
+        return *this;
     }
 
     //Should use MathMatRMaj's destructor

@@ -117,6 +117,12 @@ void GraphicObj::setSP(const unsigned int& SPLocIn, Shader* pSPIn)
     pSP = pSPIn;
 }
 
+void GraphicObj::setTX(const unsigned int& TXLocIn, Texture* pTXIn)
+{
+    TXLoc = TXLocIn;
+    pTX = pTXIn;
+}
+
 void GraphicObj::setVB(const std::vector<VertexBuffer*>& VBsIn)
 {
     PROJ_ASSERT_W_MSG(VBsIn.size() > 0, "Attempted to set A Graphic Object's Vertex Buffer with an empty VB vector");
@@ -145,6 +151,13 @@ void GraphicObj::setSP(const std::vector<Shader*>& SPsIn)
     pSP = SPsIn.back();
 }
 
+void GraphicObj::setTX(const std::vector<Texture*>& TXsIn)
+{
+    PROJ_ASSERT_W_MSG(TXsIn.size() > 0, "Attempted to set A Graphic Object's Texture with an empty TX vector");
+    TXLoc = TXsIn.size() - 1;
+    pTX = TXsIn.back();
+}
+
 void GraphicObj::setVB(const std::vector<VertexBuffer*>& VBsIn, const unsigned int indexIn)
 {
     PROJ_ASSERT_W_MSG(VBsIn.size() > indexIn, "Attempted to set A Graphic Object's Vertex Buffer with an invalid VB vector location");
@@ -171,6 +184,13 @@ void GraphicObj::setSP(const std::vector<Shader*>& SPsIn, const unsigned int ind
     PROJ_ASSERT_W_MSG(SPsIn.size() > indexIn, "Attempted to set A Graphic Object's Shader Program with an invalid SP vector location");
     SPLoc = indexIn;
     pSP = SPsIn[indexIn];
+}
+
+void GraphicObj::setTX(const std::vector<Texture*>& TXsIn, const unsigned int indexIn)
+{
+    PROJ_ASSERT_W_MSG(TXsIn.size() > indexIn, "Attempted to set A Graphic Object's Texture with an invalid TX vector location");
+    TXLoc = indexIn;
+    pTX = TXsIn[indexIn];
 }
 
 VertexBuffer* GraphicObj::getpVB()
@@ -247,6 +267,11 @@ MathVec3f GraphicObj::boundsRangeCardinalMin() const
 }
 
 MathVec3f GraphicObj::boundsRangeCardinalMax() const
+{
+    return MathVec3f();
+}
+
+MathVec3f GraphicObj::getCOM() const
 {
     return MathVec3f();
 }

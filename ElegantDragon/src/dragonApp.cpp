@@ -5,6 +5,7 @@
 #include "imgui/imgui_impl_opengl3.h"
 
 #include "GOs/dragon.h"
+#include "GOs/Box.h"
 #include "DragonDB.h"
 #include "projectDefines.h"
 #include "graphicUtilities.h"
@@ -120,6 +121,10 @@ static int dragonLoop(GLFWwindow* window, DragonDB& DrgnDB)
     testDragon5.editModelMat()[0][3] = 0;
     testDragon4.editModelMat()[2][3] = -5;
 
+    Box Box(DrgnDB);
+    DrgnDB.RenderBlocks[1]->insert(&Box);
+    //Box.editModelMat()[0][3] = 1;
+
 
     //Renderer setup
     Renderer* pRend = &DrgnDB.rend;
@@ -167,13 +172,13 @@ static int dragonLoop(GLFWwindow* window, DragonDB& DrgnDB)
             //ImGui::Checkbox("Another Window", &show_another_window);
 
             //edits x, y, z values for the camera transform (negative of camera location aka. world's offset)
-            //applies -30.0f to 30.0f offset to original value
+            //applies -100.0f to 100.0f offset to original value
             ImGui::SliderFloat("x", &(DrgnDB.RenderBlocks[1]->editMat(0)[0][3]), -100.0f, 100.0f);
             ImGui::SliderFloat("y", &(DrgnDB.RenderBlocks[1]->editMat(0)[1][3]), -100.0f, 100.0f);
             ImGui::SliderFloat("z", &(DrgnDB.RenderBlocks[1]->editMat(0)[2][3]), -100.0f, 100.0f);
 
-            //edits x, y, z values for the camera transform (negative of camera location aka. world's offset)
-            //applies -10.0f to 40.0f offset to original value
+            //edits euler angle values for the camera transform (negative of camera location aka. world's offset)
+            //applies -2pif to 2pif offset to original value
             ImGui::SliderFloat("rotX", &rotX, -2.0f * PI, 2.0f * PI);
             ImGui::SliderFloat("rotY", &rotY, -2.0f * PI, 2.0f * PI);
             ImGui::SliderFloat("rotZ", &rotZ, -2.0f * PI, 2.0f * PI);
@@ -249,6 +254,7 @@ static int dragonLoop(GLFWwindow* window, DragonDB& DrgnDB)
 
         //Store frame time
         lastFrameTimes[frameNum % PERF_COUNT_BUFFER_SIZE] = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - perfClock);
+        /*
         //Generate performance metrics
         if (frameNum % 120 == 0)
         {
@@ -267,10 +273,8 @@ static int dragonLoop(GLFWwindow* window, DragonDB& DrgnDB)
                 ", 99% Low: " << sorted[effectiveBufferSize * 99 / 100] << ", 90% Low: " << sorted[effectiveBufferSize * 9 / 10] << 
                 ", 10% Low: " << sorted[effectiveBufferSize / 10] << ", 1% Low: " << sorted[effectiveBufferSize / 100] << \
             std::endl;
-            /*for (unsigned int i = 0; i < effectiveBufferSize; ++i)
-                std::cout << lastFrameTimes[i].count() << " ";
-            std::cout << std::endl;*/
         }
+        */
         perfClock = std::chrono::high_resolution_clock::now();
         glfwSwapBuffers(window);
 

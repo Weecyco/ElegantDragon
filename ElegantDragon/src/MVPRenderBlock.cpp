@@ -34,7 +34,7 @@ quickAccessRenderBlock::quickAccessRenderBlock(std::vector<quickAccessRenderBloc
         RendObjsList.insert(*iter);
     }
 }
-
+static unsigned int debugCounter = 0;
 void quickAccessRenderBlock::drawAll(const Renderer& Rend)
 {
     //TODO: improve dirty bit implementation
@@ -74,8 +74,33 @@ void quickAccessRenderBlock::drawAll(const Renderer& Rend)
         iter->second.multDirect(RM[0], iter->first->viewModelMat());
         iter->first->getpSP()->bind();
         iter->first->getpSP()->setUniformMatrix4f("MVP", iter->second.getContent(), GL_TRUE);
+        if (iter->first->getpTX() != nullptr)
+        {
+            //iter->first->getpSP()->setUniform1i("u_Texture", iter->first->getpTX()->getSlot());
+            iter->first->getpTX()->bind();
+        }
+        if (debugCounter % 144 == 0)
+        {
+            if (iter->first->getName() == "Box")
+            {
+                MathMatRMaj<float> temp(1, 4);
+                temp[0][0] = 1;
+                temp[0][1] = 1;
+                temp[0][2] = 1;
+                temp[0][3] = 1;
+                temp.multAssignReverse(iter->second);
+                temp = temp * (1 / temp[0][3]);
+                std::cout << "Box MVP: \n" << iter->second << "\n <1,1,1> translation: \n" << temp << std::endl;
+
+
+            }
+            if (iter->first->getpTX() != nullptr)
+                std::cout << iter->first->getName() << ": " << iter->first->getpTX()->getSlot() << std::endl;
+        }
+        //if (iter->first->getName() != "Box")
         iter->first->draw(Rend);
     }
+    debugCounter++;
 }
 
 void quickAccessRenderBlock::addMatrix(MathMatRMaj<float>&& _Val)

@@ -3,36 +3,29 @@
 RectBoundElem::RectBoundElem() :
     GraphicObj("Bounding Block Element", GOTypeList::BoundElem)
 {
-    childCount = 0;
+    //default to size 2;
+    childObj.resize(defaultSize);
+    //set to null
+    memset(childObj.data(), 0, defaultSize * sizeof(GraphicObj*));
     weight = 0;
-}
-
-RectBoundElem::RectBoundElem(DragonDB& DrgnDB, unsigned int sizeIn = 0) :
-    GraphicObj(DrgnDB.GObjs, "Bounding Block Element")
-{
-    childCount = sizeIn;
-    if (sizeIn > 0)
-    {
-        childObj = new (GraphicObj*[sizeIn]);
-        //initialize base
-        for (unsigned int childIdx = 0; childIdx < childCount; ++childIdx)
-        {
-            childObj[childIdx] = nullptr;
-        }
-    }
-    else
-        childObj = nullptr;
-
+    childCount = 0;
 }
 
 RectBoundElem::~RectBoundElem()
 {
-    delete[] childObj;
+    for (auto childIter = childObj.begin(); childIter != childObj.end(); childIter++)
+    {
+        if ((*childIter) != nullptr && (*childIter)->getType() == GOTypeList::BoundElem)
+        {
+            //BoundingElement are not generally kept with the main database. memory management needs to be done on the fly
+            delete (*childIter);
+        }
+    }
 }
 
 void RectBoundElem::setChild(GraphicObj* ChildObjIn, unsigned int loc)
 {
-    PROJ_ASSERT_W_MSG(childCount > 0, "Bounding Block is empty");
+    PROJ_ASSERT_W_MSG(childObj.size() > loc, "Location does not exist yet");
     PROJ_ASSERT_W_MSG(ChildObjIn, "Child list not initialized");
 
     childObj[loc] = ChildObjIn;
@@ -41,6 +34,46 @@ void RectBoundElem::setChild(GraphicObj* ChildObjIn, unsigned int loc)
 GraphicObj* RectBoundElem::getChild(unsigned int loc) const
 {
     return childObj[loc];
+}
+
+void RectBoundElem::pushBack(GraphicObj* ChildObjIn)
+{
+
+    MathVec3f objBoundMin = ChildObjIn->boundsRangeCardinalMin();
+    MathVec3f objBoundMax = ChildObjIn->boundsRangeCardinalMax();
+    if (objBoundMin.x < cornerPt0.x)
+    {
+        cornerPt0.x = objBoundMin.x;
+    }
+    if (objBoundMin.y < cornerPt0.y)
+    {
+        cornerPt0.y = objBoundMin.y;
+    }
+    if (objBoundMin.z < cornerPt0.z)
+    {
+        cornerPt0.z = objBoundMin.z;
+    }
+    if (objBoundMax.x > cornerPt1.x)
+    {
+        cornerPt1.x = objBoundMax.x;
+    }
+    if (objBoundMax.y > cornerPt1.y)
+    {
+        cornerPt1.y = objBoundMax.y;
+    }
+    if (objBoundMax.z > cornerPt1.z)
+    {
+        cornerPt1.z = objBoundMax.z;
+    }
+
+    if (++childCount > childObj.size())
+    {
+        childObj.push_back(ChildObjIn);
+    }
+    else
+    {
+        childObj[childCount - 1] = ChildObjIn;
+    }
 }
 
 const unsigned int RectBoundElem::getChildCount() const
@@ -83,3 +116,8 @@ MathVec3f RectBoundElem::boundsRangeCardinalMax() const
 {
     return cornerPt1;
 }
+
+//float RectBoundElem::getCOM() const
+//{
+//
+//}

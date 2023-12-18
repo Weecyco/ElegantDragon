@@ -104,6 +104,7 @@ Drgn::Drgn(DragonDB& DrgnDB, unsigned int lenIn, const DrgnType typeIn) :
         DrgnDB.SPs.back()->bind();
         DrgnDB.SPs.back()->setUniformMatrix4f("MVP", MathMatRMaj<float>(4, 4, 1).getContent(), GL_TRUE);
         DrgnDB.SPs.back()->setUniform1i("u_Texture", 0);//hard code to 0 temporarily
+        setTX(DrgnDB.TXs, 0);
     }
         break;
 
